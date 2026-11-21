@@ -1,0 +1,8 @@
+watchDirectory: "./sync-folder"
+s3Bucket: "jcloud-sync-dev"
+s3Region: "us-east-1"
+s3EndpointOverride: "http://localhost:4566"
+debounceMs: 500
+metricsPort: 9090
+conflictStrategy: "KEEP_BOTH"
+ignorePatterns: ["*.tmp", "*.swp", ".git/**", ".DS_Store", ".jcloud/**"]

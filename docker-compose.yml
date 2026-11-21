@@ -1,0 +1,51 @@
+services:
+  minio:
+    image: minio/minio:RELEASE.2024-01-16T16-07-38Z
+    container_name: jcloud-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+
+  create-bucket:
+    image: minio/mc:RELEASE.2024-01-16T16-06-34Z
+    container_name: jcloud-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set myminio http://minio:9000 minioadmin minioadmin;
+      /usr/bin/mc mb --ignore-existing myminio/jcloud-sync-dev;
+      exit 0;
+      "
+
+  jcloud-sync:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: jcloud-sync-app
+    depends_on:
+      create-bucket:
+        condition: service_completed_successfully
+    environment:
+      AWS_ACCESS_KEY_ID: minioadmin
+      AWS_SECRET_ACCESS_KEY: minioadmin
+      AWS_REGION: us-east-1
+    volumes:
+      - ./sync-folder:/app/sync-folder
+      - ./config.docker.yaml:/app/config.yaml
+    command: ["watch"]
+
+volumes:
+  minio-data:

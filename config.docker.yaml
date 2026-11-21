@@ -1,0 +1,9 @@
+watchDirectory: "/app/sync-folder"
+s3Bucket: "jcloud-sync-dev"
+s3Region: "us-east-1"
+s3EndpointOverride: "http://minio:9000"
+debounceMs: 500
+metricsPort: 9090
+conflictStrategy: "KEEP_BOTH"
+aiIndexingEnabled: false
+ignorePatterns: ["*.tmp", "*.swp", ".git/**", ".DS_Store", ".jcloud/**"]
